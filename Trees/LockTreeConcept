@@ -1,0 +1,104 @@
+import java.util.*;
+class Main{
+    static Node head,nodes[];
+    static long m;
+    static class Node{
+        boolean lock;
+        int lockedChild=0;
+        Node[] child;
+        Node parent=null;
+        String value;
+        public Node(String s){
+            value=s;
+            child=new Node[(int)m];
+            lock=false;
+            lockedChild=0;
+            parent=null;
+        }
+    }
+    public static void insertion(String s,int j){
+        if(head==null){
+            head=new Node(s);
+            nodes[j++]=head;
+        }
+        else{
+            Queue<Node> q=new LinkedList<>();
+            q.add(head);
+            while(!q.isEmpty()){
+                Node temp=q.remove();
+                for(int i=0;i<m;i++){
+                    if(temp.child[i]!=null) q.add(temp.child[i]);
+                    else{
+                        temp.child[i]=new Node(s);
+                        temp.child[i].parent=temp;
+                        nodes[j++]=temp.child[i];
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    public static boolean lock(Node x){
+        Node temp=null;
+        for(int i=0;i<nodes.length;i++){
+            if((nodes[i].value).equals(x.value)){
+                temp=nodes[i];
+                break;
+            }
+        }
+        if(!temp.lock){
+            if(temp.lockedChild>0) {
+                return false;
+            }
+            else{
+                Node par=temp.parent;
+                while(par!=null){
+                    if(par.lock) return false;
+                    par=par.parent;
+                }
+                temp.lock=true;
+                par=temp.parent;
+                while(par!=null){
+                    par.lockedChild+=1;
+                    par=par.parent;
+                }
+                return temp.lock;
+            }
+        }
+        return false;
+    }
+    public static boolean unLock(String s){
+        Node temp=null;
+        for(int i=0;i<nodes.length;i++){
+            if((nodes[i].value).equals(s)){
+                temp=nodes[i];
+                break;
+            }
+        }
+        if(temp.lock){
+            Node par=temp.parent;
+            while(par!=null){
+                par.lockedChild-=1;
+                par=par.parent;
+            }
+            return true;
+        }
+        return false;
+    }
+    public static void main(String args[] ) throws Exception {
+        Scanner sc=new Scanner(System.in);
+        long n=sc.nextLong(),m1=sc.nextLong(),q=sc.nextLong();
+        m=m1;
+        nodes=new Node[(int)n];
+        sc.nextLine();
+        for(long i=0;i<n;i++){
+            insertion(sc.nextLine(),(int)i);
+        }
+        for(long i=0;i<q;i++){
+            int oType=sc.nextInt();
+            String nName=sc.next();
+            if(oType==1) System.out.println(lock(new Node(nName)));
+            else if(oType==2) System.out.println(unLock(nName));
+        }
+    }
+}
